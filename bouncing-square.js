@@ -42,9 +42,9 @@ window.onload = function() {
     // Score
     var score = 0;
 
-    // GRAVITY and gravy
+    // GRAVITY and bouncybouncespeedslowdown
     var gravity = 9.8;
-    var friction = .95;
+    var bouncybouncespeedslowdown = .95;
 
     // Initialize the game
     function init() {
@@ -97,10 +97,10 @@ window.onload = function() {
         if (square.x <= level.x) {
             // Left edge
             square.x = level.x;
-            square.xSpeed = -square.xSpeed * friction;
+            square.xSpeed = -square.xSpeed * bouncybouncespeedslowdown;
         } else if (square.x + square.width >= level.x + level.width) {
             // Right edge
-            square.xSpeed = -square.xSpeed * friction;
+            square.xSpeed = -square.xSpeed * bouncybouncespeedslowdown;
             square.x = level.x + level.width - square.width;
         }
         
@@ -108,10 +108,10 @@ window.onload = function() {
         if (square.y <= level.y) {
             // Top edge
             square.y = level.y;
-            square.ySpeed = -square.ySpeed * friction;
+            square.ySpeed = -square.ySpeed * bouncybouncespeedslowdown;
         } else if (square.y + square.height >= level.y + level.height) {
             // Bottom edge
-            square.ySpeed = -square.ySpeed * friction;
+            square.ySpeed = -square.ySpeed * bouncybouncespeedslowdown;
             square.y = level.y + level.height - square.height;
         }
     }
@@ -187,7 +187,8 @@ window.onload = function() {
             score += 1;
             
             // Increase the speed of the square by 10 percent
-            square.speed *= 1.1;
+            square.xSpeed = Math.random() * 5000;
+            square.ySpeed = Math.random() * 5000;
             
             // Give the square a random position
             square.x = Math.floor(Math.random()*(level.x+level.width-square.width));
