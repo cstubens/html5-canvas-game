@@ -9,6 +9,7 @@ window.onload = function() {
     // Get the canvas and context
     var canvas = document.getElementById("viewport"); 
     var context = canvas.getContext("2d");
+    // console.log(canvas);
     
     // Timing and frames per second
     var lastframe = 0;
@@ -30,13 +31,20 @@ window.onload = function() {
         y: 0,
         width: 0,
         height: 0,
-        xdir: 0,
-        ydir: 0,
-        speed: 0
+        // xdir: 0,
+        // ydir: 0,
+        //speed: 0,
+        color: "#ff8080",
+        xSpeed: 0,
+        ySpeed: 0,
     }
     
     // Score
     var score = 0;
+
+    // GRAVITY and gravy
+    var gravity = 9.8;
+    var friction = .95;
 
     // Initialize the game
     function init() {
@@ -51,9 +59,9 @@ window.onload = function() {
         square.height = 100;
         square.x = level.x + (level.width - square.width) / 2;
         square.y = level.y + (level.height - square.height) / 2;
-        square.xdir = 1;
-        square.ydir = 1;
-        square.speed = 200;
+        square.xSpeed = 500;
+        square.ySpeed = 0;
+        // square.speed = 50;
         
         // Initialize the score
         score = 0;
@@ -81,28 +89,29 @@ window.onload = function() {
         updateFps(dt);
         
         // Move the square, time-based
-        square.x += dt * square.speed * square.xdir;
-        square.y += dt * square.speed * square.ydir;
+        square.ySpeed += gravity;
+        square.x += dt * square.xSpeed;
+        square.y += dt * square.ySpeed;
         
         // Handle left and right collisions with the level
         if (square.x <= level.x) {
             // Left edge
-            square.xdir = 1;
             square.x = level.x;
+            square.xSpeed = -square.xSpeed * friction;
         } else if (square.x + square.width >= level.x + level.width) {
             // Right edge
-            square.xdir = -1;
+            square.xSpeed = -square.xSpeed * friction;
             square.x = level.x + level.width - square.width;
         }
         
         // Handle top and bottom collisions with the level
         if (square.y <= level.y) {
             // Top edge
-            square.ydir = 1;
             square.y = level.y;
+            square.ySpeed = -square.ySpeed * friction;
         } else if (square.y + square.height >= level.y + level.height) {
             // Bottom edge
-            square.ydir = -1;
+            square.ySpeed = -square.ySpeed * friction;
             square.y = level.y + level.height - square.height;
         }
     }
@@ -128,7 +137,7 @@ window.onload = function() {
         drawFrame();
         
         // Draw the square
-        context.fillStyle = "#ff8080";
+        context.fillStyle = square.color;
         context.fillRect(square.x, square.y, square.width, square.height);
         
         // Draw score inside the square
@@ -136,6 +145,11 @@ window.onload = function() {
         context.font = "38px Verdana";
         var textdim = context.measureText(score);
         context.fillText(score, square.x+(square.width-textdim.width)/2, square.y+65);
+        //context.fillText(score, square.x, square.y+65);
+
+        context.fillStyle = "#000000";
+        context.font = "12px Verdana";
+        context.fillText(` ${Math.round(square.x)}, ${Math.round(square.y)}`, square.x, square.y);
     }
     
     // Draw a frame with a border
@@ -167,11 +181,8 @@ window.onload = function() {
     function onMouseDown(e) {
         // Get the mouse position
         var pos = getMousePos(canvas, e);
-        
-        // Check if we clicked the square
-        if (pos.x >= square.x && pos.x < square.x + square.width &&
-            pos.y >= square.y && pos.y < square.y + square.height) {
-            
+        if (isInSquare(pos, square)) {
+
             // Increase the score
             score += 1;
             
@@ -188,9 +199,22 @@ window.onload = function() {
         }
     }
     
-    function onMouseUp(e) {}
-    function onMouseOut(e) {}
+    function onMouseUp(e) {
+        square.color = "#ff0000"
+    }
+    function onMouseOut(e) {
+        square.color = "#cecece";
+    }
     
+    //
+    function isInSquare(pos, square) {
+        // Check if we clicked the square
+        if (pos.x >= square.x && pos.x < square.x + square.width &&
+            pos.y >= square.y && pos.y < square.y + square.height) {
+                return true;
+        }
+    }
+
     // Get the mouse position
     function getMousePos(canvas, e) {
         var rect = canvas.getBoundingClientRect();
