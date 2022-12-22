@@ -37,6 +37,16 @@ window.onload = function() {
         color: "#ff8080",
         xSpeed: 0,
         ySpeed: 0,
+        randomize: function() {
+            // I am speed.
+            this.xSpeed = ((Math.random() - 0.5) * 2) * 1000;
+            this.ySpeed = ((Math.random() - 0.5) * 2) * 1000;
+            console.log(this.xSpeed, this.ySpeed)
+            
+            // Give the this a random position
+            this.x = Math.floor(Math.random()*(level.x+level.width-this.width));
+            this.y = Math.floor(Math.random()*(level.y+level.height-this.height));
+        }
     }
     
     // Score
@@ -57,11 +67,7 @@ window.onload = function() {
         // Initialize the square
         square.width = 100;
         square.height = 100;
-        square.x = level.x + (level.width - square.width) / 2;
-        square.y = level.y + (level.height - square.height) / 2;
-        square.xSpeed = 500;
-        square.ySpeed = 0;
-        // square.speed = 50;
+        square.randomize();
         
         // Initialize the score
         score = 0;
@@ -186,17 +192,8 @@ window.onload = function() {
             // Increase the score
             score += 1;
             
-            // Increase the speed of the square by 10 percent
-            square.xSpeed = Math.random() * 5000;
-            square.ySpeed = Math.random() * 5000;
-            
-            // Give the square a random position
-            square.x = Math.floor(Math.random()*(level.x+level.width-square.width));
-            square.y = Math.floor(Math.random()*(level.y+level.height-square.height));
-            
-            // Give the square a random direction
-            square.xdir = Math.floor(Math.random() * 2) * 2 - 1;
-            square.ydir = Math.floor(Math.random() * 2) * 2 - 1;
+            // Randomized speed
+            square.randomize();
         }
     }
     
