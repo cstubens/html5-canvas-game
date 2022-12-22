@@ -39,14 +39,18 @@ window.onload = function() {
         ySpeed: 0,
         randomize: function() {
             // I am speed.
-            this.xSpeed = ((Math.random() - 0.5) * 2) * 1000;
-            this.ySpeed = ((Math.random() - 0.5) * 2) * 1000;
+            this.xSpeed = ((Math.random() - 0.5) * 2) * 10000;
+            this.ySpeed = ((Math.random() - 0.5) * 2) * 100;
             console.log(this.xSpeed, this.ySpeed)
             
             // Give the this a random position
             this.x = Math.floor(Math.random()*(level.x+level.width-this.width));
             this.y = Math.floor(Math.random()*(level.y+level.height-this.height));
-        }
+        },
+        shrinking: function() {
+            this.width = this.width * .95;
+            this.height = this.height * .95;
+        },
     }
     
     // Score
@@ -119,6 +123,7 @@ window.onload = function() {
             // Bottom edge
             square.ySpeed = -square.ySpeed * bouncybouncespeedslowdown;
             square.y = level.y + level.height - square.height;
+            square.xSpeed = square.xSpeed * .99;
         }
     }
     
@@ -148,14 +153,18 @@ window.onload = function() {
         
         // Draw score inside the square
         context.fillStyle = "#ffffff";
-        context.font = "38px Verdana";
+        context.font = `${square.height/2}px Verdana`;
         var textdim = context.measureText(score);
-        context.fillText(score, square.x+(square.width-textdim.width)/2, square.y+65);
+        context.fillText(
+            score, 
+            square.x+(square.width-textdim.width)/2, 
+            square.y+(square.height) * .65
+        );
         //context.fillText(score, square.x, square.y+65);
 
         context.fillStyle = "#000000";
         context.font = "12px Verdana";
-        context.fillText(` ${Math.round(square.x)}, ${Math.round(square.y)}`, square.x, square.y);
+        context.fillText(` ${Math.round(square.x)}, ${Math.round(square.y)}`, square.x, square.y-1);
     }
     
     // Draw a frame with a border
@@ -173,7 +182,7 @@ window.onload = function() {
         // Draw title
         context.fillStyle = "#ffffff";
         context.font = "24px Verdana";
-        context.fillText("HTML5 Canvas Bouncing Square - Rembound.com", 10, 30);
+        context.fillText("Haha bouncy box go brrrr", 10, 30);
         
         // Display fps
         context.fillStyle = "#ffffff";
@@ -194,6 +203,9 @@ window.onload = function() {
             
             // Randomized speed
             square.randomize();
+
+            // Shrinking box size
+            square.shrinking();
         }
     }
     
