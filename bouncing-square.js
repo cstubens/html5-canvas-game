@@ -25,34 +25,89 @@ window.onload = function() {
         height: canvas.height - 66
     };
     
-    // Square
-    var square = {
-        x: 0,
-        y: 0,
-        width: 0,
-        height: 0,
-        // xdir: 0,
-        // ydir: 0,
-        //speed: 0,
-        color: "#ff8080",
-        xSpeed: 0,
-        ySpeed: 0,
-        randomize: function() {
+    class Square {
+        constructor() {
+            this.x = 0;
+            this.y = 0;
+            this.width = 100;
+            this.height = 100;
+            this.randomize();
+            this.color = getRandomColor();
+        }
+
+        randomize() {
             // I am speed.
-            this.xSpeed = ((Math.random() - 0.5) * 2) * 10000;
-            this.ySpeed = ((Math.random() - 0.5) * 2) * 100;
+            this.xSpeed = ((Math.random() - 0.5) * 2) * 600;
+            this.ySpeed = ((Math.random() - 0.5) * 2) * 1200;
             console.log(this.xSpeed, this.ySpeed)
             
             // Give the this a random position
             this.x = Math.floor(Math.random()*(level.x+level.width-this.width));
             this.y = Math.floor(Math.random()*(level.y+level.height-this.height));
-        },
-        shrinking: function() {
+        }
+
+        shrinking() {
             this.width = this.width * .95;
             this.height = this.height * .95;
-        },
-    }
+        }
+
+        update(dt) {
+            // Move the square, time-based
+            this.ySpeed += gravity;
+            this.x += dt * this.xSpeed;
+            this.y += dt * this.ySpeed;
+            
+            // Handle left and right collisions with the level
+            if (this.x <= level.x) {
+                // Left edge
+                this.x = level.x;
+                this.xSpeed = -this.xSpeed * bouncybouncespeedslowdown;
+            } else if (this.x + this.width >= level.x + level.width) {
+                // Right edge
+                this.xSpeed = -this.xSpeed * bouncybouncespeedslowdown;
+                this.x = level.x + level.width - this.width;
+            }
+            
+            // Handle top and bottom collisions with the level
+            if (this.y <= level.y) {
+                // Top edge
+                this.y = level.y;
+                this.ySpeed = -this.ySpeed * bouncybouncespeedslowdown;
+            } else if (this.y + this.height >= level.y + level.height) {
+                // Bottom edge
+                this.ySpeed = -this.ySpeed * bouncybouncespeedslowdown;
+                this.y = level.y + level.height - this.height;
+                this.xSpeed *= 0.99;
+            }
+        }
+        
+        render() {
+            // Draw the square
+            context.fillStyle = this.color;
+            context.fillRect(this.x, this.y, this.width, this.height);
+            
+            // Draw score inside the this
+            context.fillStyle = "#ffffff";
+            context.font = `${this.height/2}px Verdana`;
+            var textdim = context.measureText(score);
+            context.fillText(
+                score, 
+                this.x+(this.width-textdim.width)/2, 
+                this.y+(this.height) * .65
+            );
+            //context.fillText(score, this.x, this.y+65);
     
+            context.fillStyle = "#000000";
+            context.font = "12px Verdana";
+            context.fillText(` ${Math.round(this.x)}, ${Math.round(this.y)}`, this.x, this.y-1);
+        }
+    }
+
+    var cubes = new Array();
+    for (var i = 0; i < 5; i++) {
+        cubes.push(new Square());
+    }
+
     // Score
     var score = 0;
 
@@ -67,12 +122,7 @@ window.onload = function() {
         canvas.addEventListener("mousedown", onMouseDown);
         canvas.addEventListener("mouseup", onMouseUp);
         canvas.addEventListener("mouseout", onMouseOut);
-        
-        // Initialize the square
-        square.width = 100;
-        square.height = 100;
-        square.randomize();
-        
+    
         // Initialize the score
         score = 0;
     
@@ -98,32 +148,8 @@ window.onload = function() {
         // Update the fps counter
         updateFps(dt);
         
-        // Move the square, time-based
-        square.ySpeed += gravity;
-        square.x += dt * square.xSpeed;
-        square.y += dt * square.ySpeed;
-        
-        // Handle left and right collisions with the level
-        if (square.x <= level.x) {
-            // Left edge
-            square.x = level.x;
-            square.xSpeed = -square.xSpeed * bouncybouncespeedslowdown;
-        } else if (square.x + square.width >= level.x + level.width) {
-            // Right edge
-            square.xSpeed = -square.xSpeed * bouncybouncespeedslowdown;
-            square.x = level.x + level.width - square.width;
-        }
-        
-        // Handle top and bottom collisions with the level
-        if (square.y <= level.y) {
-            // Top edge
-            square.y = level.y;
-            square.ySpeed = -square.ySpeed * bouncybouncespeedslowdown;
-        } else if (square.y + square.height >= level.y + level.height) {
-            // Bottom edge
-            square.ySpeed = -square.ySpeed * bouncybouncespeedslowdown;
-            square.y = level.y + level.height - square.height;
-            square.xSpeed = square.xSpeed * .99;
+        for (var i = 0; i < cubes.length; i++) {
+            cubes[i].update(dt);
         }
     }
     
@@ -147,24 +173,10 @@ window.onload = function() {
         // Draw the frame
         drawFrame();
         
-        // Draw the square
-        context.fillStyle = square.color;
-        context.fillRect(square.x, square.y, square.width, square.height);
-        
-        // Draw score inside the square
-        context.fillStyle = "#ffffff";
-        context.font = `${square.height/2}px Verdana`;
-        var textdim = context.measureText(score);
-        context.fillText(
-            score, 
-            square.x+(square.width-textdim.width)/2, 
-            square.y+(square.height) * .65
-        );
-        //context.fillText(score, square.x, square.y+65);
-
-        context.fillStyle = "#000000";
-        context.font = "12px Verdana";
-        context.fillText(` ${Math.round(square.x)}, ${Math.round(square.y)}`, square.x, square.y-1);
+        for (var i = 0; i < cubes.length; i++) {
+            cubes[i].render()
+        }
+       
     }
     
     // Draw a frame with a border
@@ -196,24 +208,21 @@ window.onload = function() {
     function onMouseDown(e) {
         // Get the mouse position
         var pos = getMousePos(canvas, e);
-        if (isInSquare(pos, square)) {
-
-            // Increase the score
-            score += 1;
-            
-            // Randomized speed
-            square.randomize();
-
-            // Shrinking box size
-            square.shrinking();
+        for (var i = 0; i < cubes.length; i++) {
+            if (isInSquare(pos, cubes[i])) {
+                score += 1;
+                cubes[i].randomize();
+                cubes[i].shrinking();
+            }
         }
     }
-    
+
     function onMouseUp(e) {
-        square.color = "#ff0000"
+        // square.color = "#ff0000"
     }
+
     function onMouseOut(e) {
-        square.color = "#cecece";
+        // square.color = "#cecece";
     }
     
     //
@@ -234,6 +243,15 @@ window.onload = function() {
         };
     }
     
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
     // Call init to start the game
     init();
 };
