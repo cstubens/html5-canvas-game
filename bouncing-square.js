@@ -236,8 +236,16 @@ class Square {
         context.fillStyle = "#000000";
         context.font = "12px Verdana";
         context.fillText(`${Math.round(this.x)}, ${Math.round(this.y)}`, this.x, this.y-11);
-        context.fillStyle = "#666666";
-        context.fillText(`${Math.round(this.xSpeed)}, ${Math.round(this.ySpeed)}`, this.x, this.y-1);
+        // context.fillStyle = "#666666";
+        // context.fillText(`${Math.round(this.xSpeed)}, ${Math.round(this.ySpeed)}`, this.x, this.y-1);
+
+        // var x2 = this.x + this.xSpeed / 10;
+        // var y2 = this.y + this.ySpeed / 10;
+        // context.strokeStyle = "#FF0000";
+        // context.beginPath(); 
+        // context.moveTo(this.x, this.y);
+        // context.lineTo(x2, y2);
+        // context.stroke();
     }
 }
 
