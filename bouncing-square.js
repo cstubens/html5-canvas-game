@@ -20,13 +20,6 @@ class Game {
     constructor(canvas, n) {
         this.canvas = canvas;
         this.context = canvas.getContext("2d");
-        this.frame = new Frame(this.canvas, this.context)
-        this.level = {
-            x: 1,
-            y: 65,
-            width: canvas.width - 2,
-            height: canvas.height - 66
-        };
 
         // Timing and FPS
         this.lastframe = 0;
@@ -34,18 +27,25 @@ class Game {
         this.framecount = 0;
         this.fps = 0;
 
-        // constants
+        // Constants
         this.gravity = 9.8;
         this.bouncybouncespeedslowdown = 0.95;
 
-        // Game state
-        var score = 0;
+        // Create game world    
+        this.score = 0;    
+        this.frame = new Frame(this.canvas, this.context)
+        this.level = {
+            x: 1,
+            y: 65,
+            width: canvas.width - 2,
+            height: canvas.height - 66
+        };
         this.cubes = new Array()
         for (var i = 0; i < n; i++) {
             this.cubes.push(new Square(this.level));
         }
 
-        // set up mouse event listeners
+        // Set up mouse event listeners
         canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
         canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
         canvas.addEventListener("mouseup",   (e) => this.onMouseUp(e));
@@ -66,7 +66,7 @@ class Game {
 
     render() {
         // Render the Frame (header, boarder, etc)
-        this.frame.render(this.fps);
+        this.frame.render(this.score, this.fps);
 
         // Render the cubes
         for (var i = 0; i < this.cubes.length; i++) {
@@ -95,7 +95,7 @@ class Game {
         var pos = getMousePos(this.canvas, e); // Get the mouse position
         for (var i = 0; i < this.cubes.length; i++) {
             if (isInSquare(pos, this.cubes[i])) {
-                this.cubes[i].click();
+                this.cubes[i].click(this);
             }
         }
     }
@@ -117,13 +117,13 @@ class Frame {
 
     }
 
-    render(fps) {
+    render(score, fps) {
         // Draw background and a border
         this.context.fillStyle = "#d0d0d0";
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.context.fillStyle = "#e8eaec";
         this.context.fillRect(1, 1, this.canvas.width-2, this.canvas.height-2);
-        
+
         // Draw header
         this.context.fillStyle = "#303030";
         this.context.fillRect(0, 0, this.canvas.width, 65);
@@ -132,6 +132,8 @@ class Frame {
         this.context.fillStyle = "#ffffff";
         this.context.font = "24px Verdana";
         this.context.fillText("Haha bouncy box go brrrr", 10, 30);
+        var textdim = this.context.measureText(score);
+        this.context.fillText(score, this.canvas.width - 10 - textdim.width, 30);
         
         // Display fps
         this.context.fillStyle = "#ffffff";
@@ -161,9 +163,10 @@ class Square {
         this.ySpeed = ((Math.random() - 0.5) * 2) * 400;
     }
 
-    click() {
+    click(game) {
         this.score += 1;
-        this.randomize(this.level);
+        game.score += 1;
+        this.randomize(game.level);
         this.shrink();
     }
 
