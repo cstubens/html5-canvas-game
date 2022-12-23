@@ -62,6 +62,18 @@ class Game {
         for (var i = 0; i < this.cubes.length; i++) {
             this.cubes[i].update(dt, this);
         }
+
+        //collision checking
+        for (var i = 0; i < this.cubes.length; i++) {
+            var square1 = this.cubes[i];
+            for (var j = i + 1; j < this.cubes.length; j++) {
+                var square2 = this.cubes[j];
+                if (isOverlap(square1, square2)) {
+                    square1.color = "#FF0000";
+                    square2.color = "#FF0000";
+                }
+            }
+        }
     }
 
     render() {
@@ -258,4 +270,9 @@ function getRandomColor() {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
+}
+
+//check if two squares overlap
+function isOverlap(a, b) {
+    return false;
 }
