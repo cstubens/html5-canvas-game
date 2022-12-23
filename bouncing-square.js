@@ -9,11 +9,135 @@ window.onload = function() {
     var canvas = document.getElementById("viewport"); 
     var game = new Game(canvas, 5);
     function main(tframe) {
-        window.requestAnimationFrame(main);
         game.update(tframe);
         game.render();
+        window.requestAnimationFrame(main); // Request the _next_ frame to run
     }
-    main(0)
+    main(0) // Run the first frame
+}
+
+class Game {
+    constructor(canvas, n) {
+        this.canvas = canvas;
+        this.context = canvas.getContext("2d");
+        this.frame = new Frame(this.canvas, this.context)
+        this.level = {
+            x: 1,
+            y: 65,
+            width: canvas.width - 2,
+            height: canvas.height - 66
+        };
+
+        // Timing and FPS
+        this.lastframe = 0;
+        this.fpstime = 0;
+        this.framecount = 0;
+        this.fps = 0;
+
+        // constants
+        this.gravity = 9.8;
+        this.bouncybouncespeedslowdown = 0.95;
+
+        // Game state
+        var score = 0;
+        this.cubes = new Array()
+        for (var i = 0; i < n; i++) {
+            this.cubes.push(new Square(this.level));
+        }
+
+        // set up mouse event listeners
+        canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
+        canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
+        canvas.addEventListener("mouseup",   (e) => this.onMouseUp(e));
+        canvas.addEventListener("mouseout",  (e) => this.onMouseOut(e));
+    }
+
+    update(tframe) {
+        // Update FPS
+        var dt = (tframe - this.lastframe) / 1000;
+        this.lastframe = tframe;
+        this.updateFps(dt);
+
+        // Update game world
+        for (var i = 0; i < this.cubes.length; i++) {
+            this.cubes[i].update(dt, this);
+        }
+    }
+
+    render() {
+        // Render the Frame (header, boarder, etc)
+        this.frame.render(this.fps);
+
+        // Render the cubes
+        for (var i = 0; i < this.cubes.length; i++) {
+            this.cubes[i].render(this.context)
+        }
+    }
+
+    updateFps(dt) {
+        if (this.fpstime > 0.25) {
+            // Calculate fps
+            this.fps = Math.round(this.framecount / this.fpstime);
+            
+            // Reset time and framecount
+            this.fpstime = 0;
+            this.framecount = 0;
+        }
+        
+        // Increase time and framecount
+        this.fpstime += dt;
+        this.framecount++;
+    }
+
+    onMouseMove(e) {}
+
+    onMouseDown(e) {
+        var pos = getMousePos(this.canvas, e); // Get the mouse position
+        for (var i = 0; i < this.cubes.length; i++) {
+            if (isInSquare(pos, this.cubes[i])) {
+                this.cubes[i].click();
+            }
+        }
+    }
+
+    onMouseUp(e) {
+        // square.color = "#ff0000"
+    }
+
+    onMouseOut(e) {
+        // square.color = "#cecece";
+    }
+
+}
+
+class Frame {
+    constructor(canvas, context) {
+        this.canvas = canvas;
+        this.context = context;
+
+    }
+
+    render(fps) {
+        // Draw background and a border
+        this.context.fillStyle = "#d0d0d0";
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.fillStyle = "#e8eaec";
+        this.context.fillRect(1, 1, this.canvas.width-2, this.canvas.height-2);
+        
+        // Draw header
+        this.context.fillStyle = "#303030";
+        this.context.fillRect(0, 0, this.canvas.width, 65);
+        
+        // Draw title
+        this.context.fillStyle = "#ffffff";
+        this.context.font = "24px Verdana";
+        this.context.fillText("Haha bouncy box go brrrr", 10, 30);
+        
+        // Display fps
+        this.context.fillStyle = "#ffffff";
+        this.context.font = "12px Verdana";
+        this.context.fillText("Fps: " + fps, 13, 50);
+    }
 }
 
 class Square {
@@ -35,6 +159,12 @@ class Square {
         // I am speed.
         this.xSpeed = ((Math.random() - 0.5) * 2) * 600;
         this.ySpeed = ((Math.random() - 0.5) * 2) * 400;
+    }
+
+    click() {
+        this.score += 1;
+        this.randomize(this.level);
+        this.shrink();
     }
 
     shrink() {
@@ -96,132 +226,9 @@ class Square {
     }
 }
 
-class Frame {
-    constructor(canvas, context) {
-        this.canvas = canvas;
-        this.context = context;
-
-    }
-
-    render(fps) {
-        // Draw background and a border
-        this.context.fillStyle = "#d0d0d0";
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.context.fillStyle = "#e8eaec";
-        this.context.fillRect(1, 1, this.canvas.width-2, this.canvas.height-2);
-        
-        // Draw header
-        this.context.fillStyle = "#303030";
-        this.context.fillRect(0, 0, this.canvas.width, 65);
-        
-        // Draw title
-        this.context.fillStyle = "#ffffff";
-        this.context.font = "24px Verdana";
-        this.context.fillText("Haha bouncy box go brrrr", 10, 30);
-        
-        // Display fps
-        this.context.fillStyle = "#ffffff";
-        this.context.font = "12px Verdana";
-        this.context.fillText("Fps: " + fps, 13, 50);
-    }
-}
-
-class Game {
-    constructor(canvas, n) {
-        this.canvas = canvas;
-        this.context = canvas.getContext("2d");
-        this.frame = new Frame(this.canvas, this.context)
-        this.level = {
-            x: 1,
-            y: 65,
-            width: canvas.width - 2,
-            height: canvas.height - 66
-        };
-
-        // Timing and FPS
-        this.lastframe = 0;
-        this.fpstime = 0;
-        this.framecount = 0;
-        this.fps = 0;
-
-        // constants
-        this.gravity = 9.8;
-        this.bouncybouncespeedslowdown = 0.95;
-
-        // Game state
-        var score = 0;
-        this.cubes = new Array()
-        for (var i = 0; i < n; i++) {
-            this.cubes.push(new Square(this.level));
-        }
-
-        // set up mouse event listeners
-        canvas.addEventListener("mousemove", (e) => this.onMouseMove(e));
-        canvas.addEventListener("mousedown", (e) => this.onMouseDown(e));
-        canvas.addEventListener("mouseup",   (e) => this.onMouseUp(e));
-        canvas.addEventListener("mouseout",  (e) => this.onMouseOut(e));
-    }
-
-    updateFps(dt) {
-        if (this.fpstime > 0.25) {
-            // Calculate fps
-            this.fps = Math.round(this.framecount / this.fpstime);
-            
-            // Reset time and framecount
-            this.fpstime = 0;
-            this.framecount = 0;
-        }
-        
-        // Increase time and framecount
-        this.fpstime += dt;
-        this.framecount++;
-    }
-
-    update(tframe) {
-        // Update FPS
-        var dt = (tframe - this.lastframe) / 1000;
-        this.lastframe = tframe;
-        this.updateFps(dt);
-
-        // Update game world
-        for (var i = 0; i < this.cubes.length; i++) {
-            this.cubes[i].update(dt, this);
-        }
-    }
-
-    render() {
-        // Render the Frame (header, boarder, etc)
-        this.frame.render(this.fps);
-
-        // Render the cubes
-        for (var i = 0; i < this.cubes.length; i++) {
-            this.cubes[i].render(this.context)
-        }
-    }
-
-    onMouseMove(e) {}
-
-    onMouseDown(e) {
-        // Get the mouse position
-        var pos = getMousePos(this.canvas, e);
-        for (var i = 0; i < this.cubes.length; i++) {
-            if (isInSquare(pos, this.cubes[i])) {
-                this.cubes[i].score += 1;
-                this.cubes[i].randomize(this.level);
-                this.cubes[i].shrink();
-            }
-        }
-    }
-
-    onMouseUp(e) {
-        // square.color = "#ff0000"
-    }
-
-    onMouseOut(e) {
-        // square.color = "#cecece";
-    }
-
-}
+//
+// Helper functions
+//
 
 // Check if a position `pos` is inside a square
 function isInSquare(pos, square) {
