@@ -57,12 +57,16 @@ class Game {
         var dt = (tframe - this.lastframe) / 1000;
         this.lastframe = tframe;
         this.updateFps(dt);
+        dt *= 0.3;
 
         // Update game world
         for (var i = 0; i < this.cubes.length; i++) {
             this.cubes[i].update(dt, this);
         }
 
+        for (var i = 0; i < this.cubes.length; i++) {
+            this.cubes[i].color = this.cubes[i].colorOriginal;
+        }
         //collision checking
         for (var i = 0; i < this.cubes.length; i++) {
             var square1 = this.cubes[i];
@@ -71,6 +75,9 @@ class Game {
                 if (isOverlap(square1, square2)) {
                     square1.color = "#FF0000";
                     square2.color = "#FF0000";
+                } else {
+                    // square1.color = square1.colorOriginal;
+                    // square2.color = square2.colorOriginal;
                 }
             }
         }
@@ -162,6 +169,7 @@ class Square {
         this.height = 80;
         this.randomize(level);
         this.color = getRandomColor();
+        this.colorOriginal = this.color;
         this.score = 0;
     }
 
@@ -282,5 +290,11 @@ function getRandomColor() {
 
 //check if two squares overlap
 function isOverlap(a, b) {
+    if (
+            ((a.x < b.x && (a.x + a.width) > b.x) || (a.x > b.x && (b.x + b.width) > a.x))
+        && ((a.y < b.y && (a.y + a.height) > b.y) || (a.y > b.y && (b.y + b.height) > a.y))
+    ) {
+        return true;
+    } 
     return false;
 }
