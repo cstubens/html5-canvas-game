@@ -7,7 +7,7 @@
 // window.onload gets called when the window is fully loaded
 window.onload = function() {
     var canvas = document.getElementById("viewport"); 
-    var game = new Game(canvas, 5);
+    var game = new Game(canvas, 3);
     function main(tframe) {
         game.update(tframe);
         game.render();
@@ -75,10 +75,16 @@ class Game {
                 if (isOverlap(square1, square2)) {
                     square1.color = "#FF0000";
                     square2.color = "#FF0000";
+                    doBounce(square1, square2);
+                    // square1.xSpeed = -square1.xSpeed;
+                    // square1.ySpeed = -square1.ySpeed;
+                    // square2.xSpeed = -square2.xSpeed;
+                    // square2.ySpeed = -square2.ySpeed;
                 } else {
                     // square1.color = square1.colorOriginal;
                     // square2.color = square2.colorOriginal;
                 }
+                
             }
         }
     }
@@ -244,6 +250,7 @@ class Square {
         context.fillStyle = "#000000";
         context.font = "12px Verdana";
         context.fillText(`${Math.round(this.x)}, ${Math.round(this.y)}`, this.x, this.y-11);
+        // context.fillText(`${(this.x)}, ${(this.y)}`, this.x, this.y-11);
         // context.fillStyle = "#666666";
         // context.fillText(`${Math.round(this.xSpeed)}, ${Math.round(this.ySpeed)}`, this.x, this.y-1);
 
@@ -297,4 +304,29 @@ function isOverlap(a, b) {
         return true;
     } 
     return false;
+}
+
+function doBounce (a, b) {
+    function close (x, y) {
+        if (Math.abs(x - y) < 5) {
+            return true;
+        }
+        return false;
+    }
+
+    if (close(a.x + a.width, b.x)) { //a left of b
+        a.xSpeed = -a.xSpeed;
+        b.xSpeed = -b.xSpeed;
+    } else if (close(a.y + a.height, b.y)) { //a above b
+        a.ySpeed = -a.ySpeed;
+        b.ySpeed = -b.ySpeed;
+    } else if (close((a.x), b.x + b.width)) { //a right of b
+        a.xSpeed = -a.xSpeed;
+        b.xSpeed = -b.xSpeed;
+    } else if (close (a.y, b.height + b.y)) {  //a below b
+        a.ySpeed = -a.ySpeed;
+        b.ySpeed = -b.ySpeed;
+    } else {
+        return null;
+    }
 }
